@@ -19,3 +19,9 @@ To run specific tests, run:
 ```console
 $ go test -v --run TestGetCountriesBySearch 
 ```
+
+## Design Decisions
+The way this is implemented is similar to SDKs which call APIs with the function arguments being the parameters in the URL. To test the actual APIs, unit tests are written with various function arguments.
+
+## Assumptions
+Since all the APIs are simple HTTP GET requests, the functions only accept the parameters needed to pass in the URL. There maybe tests needed to run with different HTTP headers but it is assumed that testing with different headers is not required.   
