@@ -113,6 +113,35 @@ func GetCountryByAlpha2Code(alpha2Code string) (HTTPResponse, error) {
 	return httpResponse, nil
 }
 
+func GetCountryByAlpha3Code(alpha3Code string) (HTTPResponse, error) {
+	var httpResponse HTTPResponse
+	url := Host + fmt.Sprintf("/country/get/iso3code/%s", alpha3Code)
+	resp, err := Get(url)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	var response GetCountryResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	httpResponse = HTTPResponse{
+		StatusCode: resp.StatusCode,
+		Body:       response,
+	}
+
+	return httpResponse, nil
+}
+
 func Get(url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
