@@ -2,8 +2,11 @@ package testFramework
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -12,6 +15,8 @@ const (
 
 var (
 	client *http.Client
+
+	InvalidMessageErr = errors.New("Invalid message")
 )
 
 type (
@@ -76,4 +81,21 @@ func Get(url string) (*http.Response, error) {
 	}
 
 	return client.Do(req)
+}
+
+func GetTotal(message string) (int, error) {
+	splits := strings.Split(message, " ")
+	if len(splits) < 2 {
+		return 0, InvalidMessageErr
+	}
+
+	str := splits[1]
+	totalStr := str[1 : len(str)-1]
+
+	total, err := strconv.Atoi(totalStr)
+	if err != nil {
+		return 0, InvalidMessageErr
+	}
+
+	return total, nil
 }
