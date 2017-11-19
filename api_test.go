@@ -17,9 +17,9 @@ func TestGetAllCountries(t *testing.T) {
 	}
 
 	t.Logf("Verifying response body...")
-	response, ok := resp.Body.(Response)
+	response, ok := resp.Body.(GetAllCountriesResponse)
 	if !ok {
-		t.Fatalf("Expected body to be of type Response but was not")
+		t.Fatalf("Expected body to be of type GetAllCountriesResponse but was not")
 	}
 
 	t.Logf("Verifying messages...")
@@ -48,6 +48,119 @@ func TestGetAllCountries(t *testing.T) {
 	}
 	if response.RestResponse.Result[0] != expectedFirstResult {
 		t.Fatalf("Expected the first result to be %+v but was %+v", expectedFirstResult, response.RestResponse.Result[0])
+	}
+}
+
+func TestGetCountryByAlpha2Code(t *testing.T) {
+	var tests = []struct {
+		in       string
+		expected Country
+		message  string
+	}{
+		{
+			"AF",
+			Country{
+				Name:       "Afghanistan",
+				Alpha2Code: "AF",
+				Alpha3Code: "AFG",
+			},
+			"Country found matching code [AF].",
+		},
+		{
+			"AX",
+			Country{
+				Name:       "��land Islands",
+				Alpha2Code: "AX",
+				Alpha3Code: "ALA",
+			},
+			"Country found matching code [AX].",
+		},
+		{
+			"CI",
+			Country{
+				Name:       "C��te d'Ivoire",
+				Alpha2Code: "CI",
+				Alpha3Code: "CIV",
+			},
+			"Country found matching code [CI].",
+		},
+		{
+			"CW",
+			Country{
+				Name:       "Cura��ao",
+				Alpha2Code: "CW",
+				Alpha3Code: "CUW",
+			},
+			"Country found matching code [CW].",
+		},
+		{
+			"IR",
+			Country{
+				Name:       "Iran (Islamic Republic of)",
+				Alpha2Code: "IR",
+				Alpha3Code: "IRN",
+			},
+			"Country found matching code [IR].",
+		},
+		{
+			"BL",
+			Country{
+				Name:       "Saint Barth��lemy",
+				Alpha2Code: "BL",
+				Alpha3Code: "BLM",
+			},
+			"Country found matching code [BL].",
+		},
+		{
+			in:      "AB",
+			message: "No matching country found for requested code [AB].",
+		},
+		{
+			in:      "af",
+			message: "No matching country found for requested code [af].",
+		},
+		{
+			in:      "ASDFGHJKL",
+			message: "No matching country found for requested code [ASDFGHJKL].",
+		},
+	}
+
+	for i, test := range tests {
+		t.Logf("Running test %d", i)
+		testGetCountryByAlpha2CodeHelper(t, test.in, test.expected, test.message)
+	}
+}
+
+func testGetCountryByAlpha2CodeHelper(t *testing.T, alpha2Code string, expectedCountry Country, expectedMessage string) {
+	t.Logf("Making an HTTP request to get country by alpha2 code '%s'...", alpha2Code)
+	resp, err := GetCountryByAlpha2Code(alpha2Code)
+	if err != nil {
+		t.Fatalf("Encountered an error gettings country by alpha2 code: %s", err)
+	}
+
+	t.Logf("Verifying HTTP status code...")
+	if resp.StatusCode != 200 {
+		t.Fatalf("Encountered an error gettings all countries: %s", err)
+	}
+
+	t.Logf("Verifying response body...")
+	response, ok := resp.Body.(GetCountryResponse)
+	if !ok {
+		t.Fatalf("Expected body to be of type GetCountryResponse but was not")
+	}
+
+	t.Logf("Verifying messages...")
+	if len(response.RestResponse.Messages) < 1 {
+		t.Fatalf("Expected at least one message but got none")
+	}
+
+	if response.RestResponse.Messages[0] != expectedMessage {
+		t.Fatalf("Expected message to be '%s' but was '%s'", expectedMessage, response.RestResponse.Messages[0])
+	}
+
+	t.Logf("Verifying result...")
+	if response.RestResponse.Result != expectedCountry {
+		t.Fatalf("Expected result to be %+v but was %+v", expectedCountry, response.RestResponse.Result)
 	}
 }
 

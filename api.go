@@ -3,6 +3,7 @@ package testFramework
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -31,13 +32,22 @@ type (
 		Alpha3Code string `json:"alpha3_code"`
 	}
 
-	RestResponse struct {
+	GetAllCountriesRestResponse struct {
 		Messages []string  `json:"messages"`
 		Result   []Country `json:"result"`
 	}
 
-	Response struct {
-		RestResponse RestResponse `json:"RestResponse"`
+	GetAllCountriesResponse struct {
+		RestResponse GetAllCountriesRestResponse `json:"RestResponse"`
+	}
+
+	GetCountryRestResponse struct {
+		Messages []string `json:"messages"`
+		Result   Country  `json:"result"`
+	}
+
+	GetCountryResponse struct {
+		RestResponse GetCountryRestResponse `json:"RestResponse"`
 	}
 )
 
@@ -60,7 +70,36 @@ func GetAllCountries() (HTTPResponse, error) {
 		return httpResponse, err
 	}
 
-	var response Response
+	var response GetAllCountriesResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	httpResponse = HTTPResponse{
+		StatusCode: resp.StatusCode,
+		Body:       response,
+	}
+
+	return httpResponse, nil
+}
+
+func GetCountryByAlpha2Code(alpha2Code string) (HTTPResponse, error) {
+	var httpResponse HTTPResponse
+	url := Host + fmt.Sprintf("/country/get/iso2code/%s", alpha2Code)
+	resp, err := Get(url)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	var response GetCountryResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return httpResponse, err
