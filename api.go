@@ -32,13 +32,13 @@ type (
 		Alpha3Code string `json:"alpha3_code"`
 	}
 
-	GetAllCountriesRestResponse struct {
+	GetCountriesRestResponse struct {
 		Messages []string  `json:"messages"`
 		Result   []Country `json:"result"`
 	}
 
-	GetAllCountriesResponse struct {
-		RestResponse GetAllCountriesRestResponse `json:"RestResponse"`
+	GetCountriesResponse struct {
+		RestResponse GetCountriesRestResponse `json:"RestResponse"`
 	}
 
 	GetCountryRestResponse struct {
@@ -70,7 +70,7 @@ func GetAllCountries() (HTTPResponse, error) {
 		return httpResponse, err
 	}
 
-	var response GetAllCountriesResponse
+	var response GetCountriesResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return httpResponse, err
@@ -129,6 +129,35 @@ func GetCountryByAlpha3Code(alpha3Code string) (HTTPResponse, error) {
 	}
 
 	var response GetCountryResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	httpResponse = HTTPResponse{
+		StatusCode: resp.StatusCode,
+		Body:       response,
+	}
+
+	return httpResponse, nil
+}
+
+func GetCountriesBySearch(search string) (HTTPResponse, error) {
+	var httpResponse HTTPResponse
+	url := Host + fmt.Sprintf("/country/search?text=%s", search)
+	resp, err := Get(url)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return httpResponse, err
+	}
+
+	var response GetCountriesResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return httpResponse, err
