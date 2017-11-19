@@ -24,4 +24,7 @@ $ go test -v --run TestGetCountriesBySearch
 The way this is implemented is similar to SDKs which call APIs with the function arguments being the parameters in the URL. To test the actual APIs, unit tests are written with various function arguments.
 
 ## Assumptions
-Since all the APIs are simple HTTP GET requests, the functions only accept the parameters needed to pass in the URL. There maybe tests needed to run with different HTTP headers but it is assumed that testing with different headers is not required.   
+Since all the APIs are simple HTTP GET requests, the functions only accept the parameters needed to pass in the URL. There maybe tests needed to run with different HTTP headers but it is assumed that testing with different headers is not required. Also only the HTTP status code and the response body is validated. Other response headers are not validated, although it's not hard to do so with this implementation.
+
+## Limitations
+As highlighted earlier, the limitations include passing HTTP headers to the request and validating HTTP headers reurned in the response. Both of which are not hard to add but were excluded for brevity.
